@@ -40,7 +40,6 @@ $this->setTitle($applicationParameters->getName());
     <div class="d-grid gap-2">
         <?= HTMX::make(Html::button('[ Delete all completed ]', ['class' => 'btn btn btn-light']))
             ->request(Method::DELETE, '/todo/delete-completed')
-            ->triggerCustomEventAfterRequest('updateList')
             ->setSwap('none')
             ->runOnClick(); ?>
     </div>

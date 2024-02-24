@@ -12,7 +12,6 @@ $tag = Html::button('[ X ]', ['class' => 'btn btn-outline-danger btn-sm']);
 
 $htmx = HTMX::make($tag)
     ->request(Method::DELETE, '/todo/delete/' . $todo->id)
-    ->triggerCustomEventAfterRequest('updateList')
     ->setSwap('outerHTML')
     ->runOnClick();
 

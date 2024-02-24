@@ -15,6 +15,5 @@ $tag = Html::checkbox(
 echo HTMX::make($tag)
     ->request(Method::PUT, '/todo/check/' . $todo->id)
     ->setSwap('outerHTML')
-    ->triggerCustomEventAfterRequest('updateList')
     ->runOnChange();
 

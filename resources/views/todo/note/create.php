@@ -22,7 +22,6 @@ $tag = Html::input(
 echo HTMX::make($tag)
     ->request(Method::POST, '/todo/create')
     ->setSwap('outerHTML')
-    ->triggerCustomEventAfterSwap('updateList')
     ->addTriggers('keyup[keyCode==13]');
 
 
