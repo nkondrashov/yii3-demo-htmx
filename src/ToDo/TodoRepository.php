@@ -2,14 +2,18 @@
 
 namespace App\ToDo;
 
+
 use Psr\SimpleCache\CacheInterface;
 use Yiisoft\Hydrator\Hydrator;
+use Yiisoft\Validator\Validator;
 
 class TodoRepository
 {
     const CACHE_KEY = 'todos';
 
-    public function __construct(private Hydrator $hydrator, private CacheInterface $cache)
+    public function __construct(private Hydrator $hydrator,
+                                private Validator $validator,
+                                private CacheInterface $cache)
     {
     }
 
@@ -36,7 +40,7 @@ class TodoRepository
         return current($result);
     }
 
-    public function save(Todo $todo): bool
+    public function save(Todo $todo): bool|array
     {
         $list = $this->findAll();
         if (empty($todo->id)) {
@@ -49,6 +53,11 @@ class TodoRepository
                     continue;
                 }
             }
+        }
+
+        $result = $this->validator->validate($todo);
+        if(!$result->isValid()){
+            return $result->getErrorMessagesIndexedByAttribute();
         }
 
         return $this->saveList($list);

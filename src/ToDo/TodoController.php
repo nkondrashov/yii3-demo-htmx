@@ -62,19 +62,22 @@ final class TodoController
     {
         $id = $this->currentRoute->getArgument('id');
         $todo = $this->repository->findOne($id);
+        $errors = [];
 
         //Why framework do not parse PUT-body??
         parse_str($request->getBody()->getContents(), $parsedBody);
         if ($parsedBody) {
             $todo->note = ArrayHelper::getValue($parsedBody, 'note');
-            $this->repository->save($todo);
-
-            //example: send event right here (need use HTMXHeaderManager)
-            $this->headerManager->triggerCustomEventAfterSwap('updateList');
+            $errors = $this->repository->save($todo);
+            if (!is_array($errors)) {
+                $errors = [];
+                //example: send event right here (need use HTMXHeaderManager)
+                $this->headerManager->triggerCustomEventAfterSwap('updateList');
+            }
         }
 
-        if ($request->getMethod() == Method::PUT && !$parsedBody) {
-            return $this->viewRenderer->renderPartial('note/edit', ['todo' => $todo]);
+        if ($request->getMethod() == Method::PUT && !$parsedBody || is_array($errors)) {
+            return $this->viewRenderer->renderPartial('note/edit', ['todo' => $todo, 'errors' => $errors]);
         } else {
             return $this->viewRenderer->renderPartial('note/view', ['todo' => $todo]);
         }
@@ -82,18 +85,23 @@ final class TodoController
 
     public function create(ServerRequestInterface $request)
     {
+        $errors = [];
         $parsedBody = $request->getParsedBody();
+
         if ($parsedBody) {
             $todo = $this->repository->getNew($parsedBody);
-            $this->repository->save($todo);
-
-            //example: send event right here (need use HTMXHeaderManager)
-            $this->headerManager->triggerCustomEventAfterSwap('updateList');
+            $errors = $this->repository->save($todo);
+            if (!is_array($errors)) {
+                $errors = [];
+                $todo = $this->repository->getNew();
+                //example: send event right here (need use HTMXHeaderManager)
+                $this->headerManager->triggerCustomEventAfterSwap('updateList');
+            }
+        }else{
+            $todo = $this->repository->getNew();
         }
 
-        $todo = $this->repository->getNew();
-
-        return $this->viewRenderer->renderPartial('note/create', ['todo' => $todo]);
+        return $this->viewRenderer->renderPartial('note/create', ['todo' => $todo, 'errors' => $errors]);
     }
 
     public function delete()
